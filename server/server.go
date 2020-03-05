@@ -2,6 +2,7 @@ package server
 
 import (
 	"log"
+	"recursive-echo/types"
 
 	"github.com/gin-gonic/gin"
 
@@ -17,8 +18,10 @@ func Run() error {
 		log.Fatal(err)
 	}
 
+	host := types.NewHost(conf)
+
 	r := gin.Default()
-	r.Use(middleware.SetContext(conf))
+	r.Use(middleware.SetContext(host))
 	router.Build(r, conf)
 
 	return r.Run()
