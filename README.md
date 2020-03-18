@@ -22,6 +22,8 @@ host3
 HOSTNAME=host3 NEXT_HOST_ADDRESS=host2-addr NEXT_HOST_PORT=8080 go run main.go
 ```
 
+request to host3
+
 ```aidl
 curl -i -X POST -H "Content-Type:application/json" -d '[{"host_name":"curl","to":"host3"}]' 'http://host3-addr:8080'
 ```
