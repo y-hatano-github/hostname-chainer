@@ -3,11 +3,10 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 
-	"recursive-echo/config"
-	"recursive-echo/server/controllers"
+	"hostname-chainer/server/controllers"
 )
 
-func Build(r *gin.Engine, config config.Config) {
+func Build(r *gin.Engine) {
 	r.
-		GET("/", controllers.Echo)
+		POST("/", controllers.Chain)
 }

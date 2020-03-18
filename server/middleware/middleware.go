@@ -2,11 +2,12 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"recursive-echo/types"
+
+	"hostname-chainer/types"
 )
 
-func SetContext(host types.Host) gin.HandlerFunc {
+func SetHostInfo(currentHost types.CurrentHost) gin.HandlerFunc {
 	return func(context *gin.Context) {
-		context.Set("host", host)
+		context.Set("currentHost", currentHost)
 	}
 }

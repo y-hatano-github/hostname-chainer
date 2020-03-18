@@ -1,6 +1,6 @@
 package main
 
-import "recursive-echo/server"
+import "hostname-chainer/server"
 
 func main() {
 	err := server.Run()

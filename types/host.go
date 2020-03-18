@@ -1,38 +1,42 @@
 package types
 
 import (
-	"recursive-echo/config"
-	"recursive-echo/nexthost"
+	"hostname-chainer/config"
 )
 
-type Host interface {
-	GetName() string
+type CurrentHost interface {
+	GetHostName() string
+	GetNextHostAddress() string
+	GetNextHostPort() string
 	HasNextHostInfo() bool
-	GetNextHostClient() nexthost.Client
 }
 
-type HostInfo struct {
-	hostName     string
-	nextHostPort string
+type currentHostInfo struct {
+	hostName        string
+	nextHostPort    string
 	nextHostAddress string
 }
 
-func NewHost(conf config.Config) Host {
-	return &HostInfo{
-		hostName:    conf.HostName,
+func NewHost(conf config.Config) CurrentHost {
+	return &currentHostInfo{
+		hostName:        conf.HostName,
 		nextHostAddress: conf.NextHostAddress,
-		nextHostPort: conf.NextPort,
+		nextHostPort:    conf.NextHostPort,
 	}
 }
 
-func (h *HostInfo) GetName() string {
+func (h *currentHostInfo) GetHostName() string {
 	return h.hostName
 }
 
-func (h *HostInfo) HasNextHostInfo() bool {
-	return h.nextHostAddress != "" && h.nextHostPort != ""
+func (h *currentHostInfo) GetNextHostAddress() string {
+	return h.nextHostAddress
 }
 
-func (h *HostInfo) GetNextHostClient() nexthost.Client {
-	return nexthost.NewNextHostClient(h.nextHostAddress, h.nextHostPort)
+func (h *currentHostInfo) GetNextHostPort() string {
+	return h.nextHostPort
+}
+
+func (h *currentHostInfo) HasNextHostInfo() bool {
+	return h.nextHostAddress != "" && h.nextHostPort != ""
 }

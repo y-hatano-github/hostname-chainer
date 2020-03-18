@@ -2,13 +2,13 @@ package server
 
 import (
 	"log"
-	"recursive-echo/types"
+
+	"hostname-chainer/config"
+	"hostname-chainer/server/middleware"
+	"hostname-chainer/server/router"
+	"hostname-chainer/types"
 
 	"github.com/gin-gonic/gin"
-
-	"recursive-echo/config"
-	"recursive-echo/server/middleware"
-	"recursive-echo/server/router"
 )
 
 func Run() error {
@@ -18,12 +18,12 @@ func Run() error {
 		log.Fatal(err)
 	}
 
-	host := types.NewHost(conf)
+	currentHostInfo := types.NewHost(conf)
 
 	r := gin.Default()
-	r.Use(middleware.SetContext(host))
-	router.Build(r, conf)
+	r.Use(middleware.SetHostInfo(currentHostInfo))
+	router.Build(r)
 
-	return r.Run()
+	return r.Run(":" + conf.ListenPort)
 
 }

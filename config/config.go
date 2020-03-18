@@ -6,8 +6,9 @@ import (
 
 type Config struct {
 	HostName        string `envconfig:"HOSTNAME" required:"true"`
+	ListenPort      string `envconfig:"LISTEN_PORT" default:"8080"`
 	NextHostAddress string `envconfig:"NEXT_HOST_ADDRESS" default:""`
-	NextPort        string `envconfig:"NEXT_PORT" default:"8080"`
+	NextHostPort    string `envconfig:"NEXT_HOST_PORT" default:"8080"`
 }
 
 func (c *Config) LoadConfig() error {
