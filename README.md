@@ -1,7 +1,7 @@
 # hostname-chainer
 
-![](https://github.com/masanetes/hostname-chainer/workflows/Go/badge.svg)
-![](https://github.com/masanetes/hostname-chainer/workflows/Docker/badge.svg)
+![](https://github.com/masanetes/hostname-chainer/workflows/Build/badge.svg)
+![](https://github.com/masanetes/hostname-chainer/workflows/DockerPublish/badge.svg)
 
 for experiment
 
