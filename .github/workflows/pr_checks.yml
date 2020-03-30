@@ -1,4 +1,4 @@
-name: pr_checks
+name: PR Checks
 
 on:
   pull_request:
@@ -7,8 +7,8 @@ on:
 
 jobs:
 
-  test:
-    name: Test
+  go_test:
+    name: Go Test
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.13
@@ -23,4 +23,16 @@ jobs:
         run: go get -v -t -d ./...
 
       - name: Test code
-        run: go test -v .
+        run: go test -v ./...
+
+  hadolint:
+    name: hadolint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: hadolint
+        uses: reviewdog/action-hadolint@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-check
