@@ -4,6 +4,7 @@ import (
 	"hostname-chainer/config"
 )
 
+// host interface
 type CurrentHost interface {
 	GetHostName() string
 	GetNextHostAddress() string
@@ -17,6 +18,7 @@ type currentHostInfo struct {
 	nextHostAddress string
 }
 
+// create current host infomation struct from environment
 func NewHost(conf config.Config) CurrentHost {
 	return &currentHostInfo{
 		hostName:        conf.HostName,
