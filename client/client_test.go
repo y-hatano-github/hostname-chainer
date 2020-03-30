@@ -5,5 +5,5 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	t.Log("execute test")
+	t.Errorf("failure test")
 }

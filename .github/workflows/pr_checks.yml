@@ -1,4 +1,4 @@
-name: pr_checks
+name: PR Checks
 
 on:
   pull_request:
@@ -23,4 +23,4 @@ jobs:
         run: go get -v -t -d ./...
 
       - name: Test code
-        run: go test -v .
+        run: go test -v ./...
