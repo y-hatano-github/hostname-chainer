@@ -1,95 +1,123 @@
-name: Build
+name: ActionsCI
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
     tags:
       - v*
-  pull_request:
-    branches: [ master ]
-
-env:
-  IMAGE_NAME: image
 
 jobs:
 
-  build:
-    name: Build
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.13
         uses: actions/setup-go@v1
         with:
           go-version: 1.13
-        id: go
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
       - name: Get dependencies
+        run: go get -v -t -d ./...
+
+      - name: Test code
+        run: go test -v .
+
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2.0.0
+        env:
+          SLACK_ICON: https://avatars0.githubusercontent.com/u/44036562?s=100&v=4
+          SLACK_USERNAME: GitHubActions
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+  setup-release:
+    name: Setup release
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Get url to upload to release from output
+        env:
+          url: ${{ steps.create_release.outputs.upload_url }}
         run: |
-          go get -v -t -d ./...
-          if [ -f Gopkg.toml ]; then
-              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-              dep ensure
-          fi
+          mkdir artifact
+          echo $url > artifact/url.txt
+
+      - name: Upload artifact to share url with other jobs
+        uses: actions/upload-artifact@v1
+        with:
+          name: artifact
+          path: artifact/url.txt
+
+  release-pkg:
+    name: Release package
+    needs: setup-release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [darwin-amd64, linux-amd64, windows-amd64]
+        include:
+          - os: darwin-amd64
+            goos: darwin
+            arch: amd64
+          - os: linux-amd64
+            goos: linux
+            arch: amd64
+          - os: windows-amd64
+            goos: windows
+            arch: amd64
+    steps:
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+
+      - name: Get dependencies
+        run: go get -v -t -d ./...
 
       - name: Build
-        run: go build -v .
-
-  # Run tests.
-  # See also https://docs.docker.com/docker-hub/builds/automated-testing/
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Run tests
+        env:
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.arch }}
         run: |
-          if [ -f docker-compose.test.yml ]; then
-            docker-compose --file docker-compose.test.yml build
-            docker-compose --file docker-compose.test.yml run sut
-          else
-            docker build . --file Dockerfile
-          fi
+          mkdir dist
+          GOOS=$goos GOARCH=$goarch go build -v -o dist/hostname-chainer .
+          zip -j -r release dist
 
-  # Push image to GitHub Packages.
-  # See also https://docs.docker.com/docker-hub/builds/
-  push:
-    # Ensure test job passes before pushing image.
-    needs: test
+      - name: Download artifact to get url to upload to release
+        uses: actions/download-artifact@v1
+        with:
+          name: artifact
 
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Build image
-        run: docker build . --file Dockerfile --tag image
-
-      - name: Log into registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
-
-      - name: Push image
+      - name: Get url to upload to release from artifact
+        id: get_url
         run: |
-          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+          url=$(cat artifact/url.txt)
+          echo "##[set-output name=upload_url;]$url"
 
-          # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
-
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
-
-          docker tag image $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_url.outputs.upload_url }}
+          asset_path: release.zip
+          asset_name: release-${{ matrix.os }}.zip
+          asset_content_type: application/zip
