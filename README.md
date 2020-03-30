@@ -1,6 +1,6 @@
 # hostname-chainer
 
-![ActionsCI](https://github.com/masanetes/hostname-chainer/workflows/ActionsCI/badge.svg)
+![CI](https://github.com/masanetes/hostname-chainer/workflows/CI/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/masanetes/hostname-chainer)](https://goreportcard.com/report/github.com/masanetes/hostname-chainer)
 
 for experiment
