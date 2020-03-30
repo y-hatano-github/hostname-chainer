@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// chain host name controller
 func Chain(c *gin.Context) {
 	currentHost := c.MustGet("currentHost").(types.CurrentHost)
 

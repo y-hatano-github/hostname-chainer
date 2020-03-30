@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// start server
 func Run() error {
 
 	var conf config.Config
