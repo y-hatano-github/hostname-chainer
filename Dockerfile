@@ -11,3 +11,5 @@ RUN apk --no-cache add tzdata && \
 WORKDIR /work
 COPY --from=builder /go/src/hostname-chainer/main /work
 ENTRYPOINT ["./main"]
+
+EXPOSE 88888
