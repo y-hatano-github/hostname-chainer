@@ -5,7 +5,7 @@ on:
     branches-ignore:
       - '**'
     tags:
-      - v*
+      - 'v*'
 
 jobs:
 
@@ -25,12 +25,14 @@ jobs:
         run: go get -v -t -d ./...
 
       - name: Test code
+        run: go test -v ./...
+
+      - name: Slack notification
         uses: rtCamp/action-slack-notify@v2.0.0
         env:
           SLACK_ICON: https://avatars0.githubusercontent.com/u/44036562?s=100&v=4
           SLACK_USERNAME: GitHubActions
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        run: go test -v .
 
   setup-release:
     name: Setup release
