@@ -119,3 +119,24 @@ jobs:
           asset_path: release.zip
           asset_name: release-${{ matrix.os }}.zip
           asset_content_type: application/zip
+
+  docker-build-and-push:
+    name: Docker build and push
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Login to docker Registries
+        env:
+          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+          DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
+        run: |
+          echo ${DOCKER_HUB_TOKEN} | docker login -u ${DOCKER_HUB_USER} --password-stdin
+
+      - name: Build and Push to DockerHub
+        run: |
+          IMAGE_TAG=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
+          docker build -t ${{ github.repository }}:$IMAGE_TAG .
+          docker push ${{ github.repository }}:$IMAGE_TAG
