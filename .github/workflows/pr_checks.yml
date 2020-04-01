@@ -25,8 +25,8 @@ jobs:
       - name: Test code
         run: go test -v ./...
 
-  hadolint:
-    name: hadolint
+  hadolint-check:
+    name: hadolint-check
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -36,3 +36,15 @@ jobs:
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-check
+
+  hadolint-reviewer:
+    name: hadolint-reviewer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Review code
+        uses: actions/checkout@v2
+      - name: hadolint
+        uses: reviewdog/action-hadolint@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
